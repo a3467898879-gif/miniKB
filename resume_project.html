@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>miniKB 简历项目经历</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.8;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .version-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 0;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            background: #fff;
+            font-weight: 600;
+            color: #2563eb;
+        }
+        .tab:hover { background: #d0d0d0; }
+        .tab.active:hover { background: #fff; }
+        .panel {
+            display: none;
+            background: #fff;
+            border-radius: 0 8px 8px 8px;
+            padding: 36px 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .panel.active { display: block; }
+
+        /* Resume content styling */
+        .proj-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8e8e8;
+        }
+        .proj-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .proj-role {
+            font-size: 14px;
+            color: #666;
+        }
+        .proj-tech {
+            font-size: 13px;
+            color: #2563eb;
+            background: #eff6ff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+        .proj-section {
+            margin-bottom: 18px;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .bullet-list {
+            list-style: none;
+            padding: 0;
+        }
+        .bullet-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #444;
+            line-height: 1.7;
+        }
+        .bullet-list li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #2563eb;
+            font-weight: bold;
+        }
+        .highlight {
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .copy-btn {
+            float: right;
+            padding: 6px 16px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover { background: #1d4ed8; }
+        .copy-btn.copied { background: #16a34a; }
+        .tip {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 12px 16px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #78350f;
+            border-radius: 0 4px 4px 0;
+        }
+        .tip strong { color: #92400e; }
+        .divider {
+            height: 1px;
+            background: #e8e8e8;
+            margin: 24px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="version-tabs">
+        <button class="tab active" onclick="switchTab(0)">精简版（推荐）</button>
+        <button class="tab" onclick="switchTab(1)">详细版</button>
+        <button class="tab" onclick="switchTab(2)">英文版</button>
+        <button class="tab" onclick="switchTab(3)">面试话术</button>
+    </div>
+
+    <!-- ========== 精简版 ========== -->
+    <div class="panel active" id="panel-0">
+        <button class="copy-btn" onclick="copyText(0)">复制</button>
+        <div class="proj-header">
+            <span class="proj-name">miniKB — RAG 知识库问答系统</span>
+            <span class="proj-role">独立开发 · Python 后端 + 全栈</span>
+        </div>
+        <div class="proj-tech">FastAPI · SQLAlchemy 2.0 · ChromaDB · OpenAI API · Vue 3 · Docker</div>
+
+        <div class="proj-section">
+            <div class="section-title">项目描述</div>
+            <div style="font-size:14px;color:#444;line-height:1.7;">
+                基于 RAG（检索增强生成）架构的企业知识库问答系统，支持多格式文档上传、自动分块向量化、语义检索和 LLM 流式问答，仿 MaxKB 核心架构独立实现。代码量约 2300 行，26 个文件。
+            </div>
+        </div>
+
+        <div class="proj-section">
+            <div class="section-title">核心工作</div>
+            <ul class="bullet-list">
+                <li>设计并实现 <span class="highlight">三层架构</span>（API → Service → Data），包含 7 个核心服务模块、5 张 ORM 数据表、3 组 RESTful API 路由，层间通过 Pydantic Schema 解耦</li>
+                <li>实现 <span class="highlight">RAG 全链路</span>：文档解析（PDF/DOCX/TXT/MD/HTML）→ 递归字符分块（支持重叠）→ Embedding 向量化 → ChromaDB 余弦相似度检索 Top-K → LLM 流式生成 → 引用溯源</li>
+                <li>基于 FastAPI <span class="highlight">SSE（Server-Sent Events）</span>实现流式问答，前端实时渲染 LLM 生成过程，支持多轮对话上下文和检索来源展示</li>
+                <li>通过 OpenAI 兼容接口实现 <span class="highlight">多模型适配</span>，一套代码兼容 DeepSeek / OpenAI / Moonshot / SiliconFlow / Ollama 五种 LLM 供应商</li>
+                <li>运用 <span class="highlight">Singleton、Pipeline、Strategy、DTO</span> 四种设计模式，Embedding 服务实现本地/远程自动降级策略</li>
+                <li>编写 Dockerfile + docker-compose.yml 实现一键容器化部署，含完整 README 文档和 Swagger API 文档</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ========== 详细版 ========== -->
+    <div class="panel" id="panel-1">
+        <button class="copy-btn" onclick="copyText(1)">复制</button>
+        <div class="proj-header">
+            <span class="proj-name">miniKB — 基于 RAG 的智能知识库问答系统</span>
+            <span class="proj-role">独立开发 · 全栈</span>
+        </div>
+        <div class="proj-tech">FastAPI · SQLAlchemy 2.0 (async) · ChromaDB · OpenAI SDK · Vue 3 · Docker · 约 2300 行代码</div>
+
+        <div class="proj-section">
+            <div class="section-title">项目背景</div>
+            <div style="font-size:14px;color:#444;line-height:1.7;">
+                企业内部存在大量非结构化文档（PDF/Word/网页），传统关键词检索无法理解语义。本项目实现 RAG（检索增强生成）系统：将文档向量化存储，用户提问时语义检索相关段落，交由大模型生成准确回答，解决"AI 不知道企业内部知识"的问题。
+            </div>
+        </div>
+
+        <div class="proj-section">
+            <div class="section-title">技术架构</div>
+            <ul class="bullet-list">
+                <li><span class="highlight">分层架构</span>：API 层（FastAPI 路由）→ Service 层（7 个核心服务）→ Data 层（SQLite 元数据 + ChromaDB 向量存储），层间通过 Pydantic Schema DTO 解耦</li>
+                <li><span class="highlight">数据模型</span>：5 张 SQLAlchemy ORM 表（KnowledgeBase / Document / DocumentChunk / ChatSession / ChatMessage），支持级联删除和关联查询</li>
+                <li><span class="highlight">异步架构</span>：FastAPI + SQLAlchemy async + aiosqlite，文档处理通过 BackgroundTasks 异步执行，不阻塞 API 响应</li>
+            </ul>
+        </div>
+
+        <div class="proj-section">
+            <div class="section-title">RAG 核心链路实现</div>
+            <ul class="bullet-list">
+                <li><span class="highlight">文档解析</span>：适配 pypdf / python-docx / beautifulsoup4 / markdownify 四种解析器，统一输出纯文本</li>
+                <li><span class="highlight">智能分块</span>：基于 LangChain RecursiveCharacterTextSplitter 实现递归字符分割，支持 chunk_size 和 chunk_overlap 参数调优，避免语义断裂</li>
+                <li><span class="highlight">向量化</span>：Embedding 服务支持双模式——远程 OpenAI 兼容 API 或本地 ONNX 模型（all-MiniLM-L6-v2），通过 base_url 自动检测切换，降级无感知</li>
+                <li><span class="highlight">向量检索</span>：ChromaDB 持久化存储，每个知识库独立 Collection 实现向量隔离，Cosine 相似度 Top-K 检索</li>
+                <li><span class="highlight">LLM 生成</span>：System Prompt 注入检索上下文 + RAG 指令约束（只基于资料回答、标注引用来源），temperature=0.3 降低幻觉</li>
+                <li><span class="highlight">流式输出</span>：SSE 协议实现 token 级流式传输，先推送检索来源再流式生成回答，支持多轮对话历史（最近 6 条）</li>
+                <li><span class="highlight">引用溯源</span>：回答附带检索命中的文档名、内容摘要和相似度分数，前端可展开查看原文</li>
+            </ul>
+        </div>
+
+        <div class="proj-section">
+            <div class="section-title">工程化实践</div>
+            <ul class="bullet-list">
+                <li>运用 <span class="highlight">Singleton</span> 模式管理 Embedding / VectorStore / LLM 全局实例，避免重复初始化</li>
+                <li>运用 <span class="highlight">Pipeline</span> 模式编排文档处理流水线（parse → chunk → embed → store），每步有日志和状态回写</li>
+                <li>运用 <span class="highlight">Strategy</span> 模式实现多模型适配，切换供应商只需改 .env 配置</li>
+                <li>Docker 多阶段构建，docker-compose 一键启动，含健康检查和自动重连</li>
+                <li>FastAPI 自动生成 Swagger API 文档，README 含架构图、设计模式说明和完整使用指南</li>
+            </ul>
+        </div>
+
+        <div class="proj-section">
+            <div class="section-title">项目成果</div>
+            <ul class="bullet-list">
+                <li>独立完成 <span class="highlight">2300+ 行代码</span>，26 个文件，覆盖后端、前端、部署全链路</li>
+                <li>支持 <span class="highlight">5 种文档格式</span>、<span class="highlight">5 种 LLM 供应商</span>即插即用</li>
+                <li>文档上传到可问答全流程 <span class="highlight">&lt; 10 秒</span>（10 页 PDF）</li>
+                <li>项目可直接运行，已通过冒烟测试验证全部 API 接口</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ========== 英文版 ========== -->
+    <div class="panel" id="panel-2">
+        <button class="copy-btn" onclick="copyText(2)">Copy</button>
+        <div class="proj-header">
+            <span class="proj-name">miniKB — RAG-Powered Knowledge Base Q&A System</span>
+            <span class="proj-role">Solo Developer · Full Stack</span>
+        </div>
+        <div class="proj-tech">FastAPI · SQLAlchemy 2.0 (async) · ChromaDB · OpenAI SDK · Vue 3 · Docker · ~2,300 LOC</div>
+
+        <div class="proj-section">
+            <div class="section-title">Overview</div>
+            <div style="font-size:14px;color:#444;line-height:1.7;">
+                Built a Retrieval-Augmented Generation (RAG) system that ingests multi-format documents, chunks and embeds them into a vector database, and answers user questions with LLM-generated responses grounded in retrieved context — with citation tracing and real-time streaming.
+            </div>
+        </div>
+
+        <div class="proj-section">
+            <div class="section-title">Key Contributions</div>
+            <ul class="bullet-list">
+                <li>Architected a <span class="highlight">3-layer system</span> (API → Service → Data) with 7 core service modules, 5 ORM models, and 3 RESTful route groups, decoupled via Pydantic schemas</li>
+                <li>Implemented the <span class="highlight">full RAG pipeline</span>: document parsing (PDF/DOCX/TXT/MD/HTML) → recursive character splitting with overlap → embedding → ChromaDB cosine similarity Top-K retrieval → LLM streaming generation → citation tracing</li>
+                <li>Built <span class="highlight">SSE streaming</span> for real-time token-by-token LLM response rendering, with multi-turn conversation context and source citation display</li>
+                <li>Designed a <span class="highlight">multi-provider adapter</span> via OpenAI-compatible API, supporting DeepSeek / OpenAI / Moonshot / SiliconFlow / Ollama with zero code changes</li>
+                <li>Applied <span class="highlight">Singleton, Pipeline, Strategy, and DTO</span> design patterns; implemented automatic local-to-remote embedding fallback strategy</li>
+                <li>Containerized with Docker Compose, including health checks and auto-reconnect; documented with Swagger API docs and comprehensive README</li>
+            </ul>
+        </div>
+
+        <div class="proj-section">
+            <div class="section-title">Results</div>
+            <ul class="bullet-list">
+                <li>Delivered <span class="highlight">2,300+ lines</span> across 26 files covering backend, frontend, and deployment</li>
+                <li>Supports <span class="highlight">5 document formats</span> and <span class="highlight">5 LLM providers</span> out of the box</li>
+                <li>End-to-end document ingestion to Q&A in <span class="highlight">&lt; 10 seconds</span> (10-page PDF)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ========== 面试话术 ========== -->
+    <div class="panel" id="panel-3">
+        <button class="copy-btn" onclick="copyText(3)">复制</button>
+
+        <div class="proj-section">
+            <div class="section-title">面试官问：介绍一下这个项目</div>
+            <div style="font-size:14px;color:#444;line-height:1.8;padding:12px 16px;background:#f8f9fa;border-radius:6px;">
+                "miniKB 是我独立开发的一个 RAG 知识库问答系统，核心解决的问题是：让 AI 能基于企业内部文档准确回答问题，而不是凭空编造。<br><br>
+                系统分三层：API 层用 FastAPI，Service 层有 7 个核心模块负责文档解析、分块、向量化、检索和生成，Data 层用 SQLite 存元数据 + ChromaDB 存向量。<br><br>
+                用户上传文档后，系统自动解析、递归分块、Embedding 向量化存入 ChromaDB。提问时，先将问题向量化，在 ChromaDB 做 Cosine 相似度检索取 Top-K，然后把检索到的上下文拼进 System Prompt，交给 LLM 流式生成回答，最后通过 SSE 推到前端实时显示。回答会附带引用来源，可以溯源到具体文档和段落。"<br><br>
+                <span style="color:#2563eb;font-size:13px;">→ 突出：RAG 全链路理解、架构设计能力、独立交付</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="proj-section">
+            <div class="section-title">面试官问：为什么用 ChromaDB 而不是 pgvector / Milvus / Pinecone？</div>
+            <div style="font-size:14px;color:#444;line-height:1.8;padding:12px 16px;background:#f8f9fa;border-radius:6px;">
+                "选 ChromaDB 主要三个原因：一是轻量，纯 Python 实现，pip install 就能用，不依赖额外服务；二是开发效率高，自带 Embedding Function 和持久化，原型阶段能快速跑通；三是每个知识库用独立 Collection 做向量隔离，删除知识库时直接删 Collection，不用维护复杂的过滤逻辑。<br><br>
+                如果是生产环境、文档量到百万级，我会考虑切到 Milvus 做分布式向量检索，或者用 pgvector 复用现有 PostgreSQL。Pinecone 是托管服务，适合不想运维的场景，但数据要出域。"<br><br>
+                <span style="color:#2563eb;font-size:13px;">→ 突出：技术选型有理有据、知道各方案优缺点、有生产环境意识</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="proj-section">
+            <div class="section-title">面试官问：怎么解决 LLM 幻觉问题？</div>
+            <div style="font-size:14px;color:#444;line-height:1.8;padding:12px 16px;background:#f8f9fa;border-radius:6px;">
+                "主要四层策略：<br>
+                1. <b>System Prompt 约束</b>——明确要求"只根据提供的参考资料回答，不要编造信息"，如果资料中没有相关内容必须告知用户<br>
+                2. <b>低温度生成</b>——temperature 设为 0.3，降低随机性，让模型更忠于检索到的上下文<br>
+                3. <b>引用溯源</b>——回答末尾标注引用来源编号 [1] [2]，前端展示检索命中的文档名和相似度分数，用户可以验证<br>
+                4. <b>检索质量保障</b>——chunk_size 和 overlap 可调，Top-K 取 5，如果检索分数都很低说明知识库没有覆盖这个问题，前端会提示"
+                <br><br>
+                <span style="color:#2563eb;font-size:13px;">→ 突出：不只靠 prompt，有系统性的幻觉防控策略</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="proj-section">
+            <div class="section-title">面试官问：用了哪些设计模式？为什么要用？</div>
+            <div style="font-size:14px;color:#444;line-height:1.8;padding:12px 16px;background:#f8f9fa;border-radius:6px;">
+                "四个核心模式：<br>
+                1. <b>Singleton</b>——embedding_service、vector_store、llm_provider 三个全局单例，避免每次请求重复创建 OpenAI client 和 ChromaDB 连接<br>
+                2. <b>Pipeline</b>——document_pipeline 模块编排文档处理流水线（解析→分块→向量化→存储），每步有独立日志和状态回写，出错可以定位到具体步骤<br>
+                3. <b>Strategy</b>——LLM 和 Embedding 通过 OpenAI 兼容接口实现多供应商策略，切换 DeepSeek/OpenAI/Ollama 只需改 .env 配置，不改代码<br>
+                4. <b>DTO</b>——Pydantic Schema 和 SQLAlchemy ORM Model 分离，API 层不直接暴露数据库结构，字段可以独立演进"
+                <br><br>
+                <span style="color:#2563eb;font-size:13px;">→ 突出：设计模式不是背的，是解决实际问题用的</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="proj-section">
+            <div class="section-title">面试官问：如果文档量很大（百万级），架构怎么演进？</div>
+            <div style="font-size:14px;color:#444;line-height:1.8;padding:12px 16px;background:#f8f9fa;border-radius:6px;">
+                "几个方向：<br>
+                1. <b>向量库升级</b>——ChromaDB 换成 Milvus 集群，支持分布式检索和十亿级向量<br>
+                2. <b>异步处理</b>——文档解析和向量化走 Celery + Redis 消息队列，避免大文件阻塞 API<br>
+                3. <b>分层检索</b>——先做粗排（BM25 关键词召回），再做精排（向量相似度），减少向量检索的计算量<br>
+                4. <b>缓存层</b>——高频问题的 Embedding 向量和检索结果缓存到 Redis，避免重复计算<br>
+                5. <b>分库分表</b>——按知识库 ID 做水平分片，每个知识库的向量存在独立的 Collection/Partition"
+                <br><br>
+                <span style="color:#2563eb;font-size:13px;">→ 突出：有架构演进思维、知道当前方案的瓶颈在哪</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="proj-section">
+            <div class="section-title">面试官问：SSE 和 WebSocket 有什么区别？为什么选 SSE？</div>
+            <div style="font-size:14px;color:#444;line-height:1.8;padding:12px 16px;background:#f8f9fa;border-radius:6px;">
+                "SSE 是单向的（服务器→客户端），基于 HTTP，自动重连，适合 LLM 流式输出这种场景——只需要服务端推 token，客户端不需要往回发数据。<br><br>
+                WebSocket 是双向的，适合实时聊天、协作编辑这种需要客户端也频繁推数据的场景。但 WebSocket 需要单独的连接管理、心跳维护，复杂度更高。<br><br>
+                我这个场景：用户发一次问题，服务端流式返回回答，是典型的单向推送，SSE 足够了，而且 FastAPI 原生支持 StreamingResponse，实现很简洁。"
+                <br><br>
+                <span style="color:#2563eb;font-size:13px;">→ 突出：技术选型基于场景需求，不是为了用而用</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="tip">
+        <strong>简历使用建议：</strong><br>
+        1. <strong>精简版</strong>适合简历正文，控制在 5-6 条 bullet point<br>
+        2. <strong>详细版</strong>适合放在项目作品集 / 个人网站 / 面试时展开讲<br>
+        3. <strong>英文版</strong>适合外企或英文简历<br>
+        4. <strong>面试话术</strong>适合面试前复习，覆盖了面试官最常问的 6 个问题<br>
+        5. 简历上可以附上 <strong>GitHub 链接</strong>和<strong>在线 Demo</strong>，加分明显
+    </div>
+
+</div>
+
+<script>
+function switchTab(idx) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.panel').forEach((p, i) => {
+        p.classList.toggle('active', i === idx);
+    });
+}
+
+function copyText(idx) {
+    const panel = document.getElementById('panel-' + idx);
+    const btn = panel.querySelector('.copy-btn');
+    // Get text content excluding the button
+    const clone = panel.cloneNode(true);
+    const btnInClone = clone.querySelector('.copy-btn');
+    if (btnInClone) btnInClone.remove();
+    const text = clone.innerText.trim();
+    navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '已复制 ✓';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = orig;
+            btn.classList.remove('copied');
+        }, 2000);
+    });
+}
+</script>
+</body>
+</html>

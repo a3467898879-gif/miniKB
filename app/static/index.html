@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>miniKB — Mini RAG 知识库</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
+    <div class="sidebar-header">
+      <span class="logo" v-if="!sidebarCollapsed">📚 miniKB</span>
+      <span class="logo" v-else>📚</span>
+      <button class="icon-btn" @click="sidebarCollapsed = !sidebarCollapsed">
+        {{ sidebarCollapsed ? '▶' : '◀' }}
+      </button>
+    </div>
+
+    <!-- KB List -->
+    <div class="sidebar-section" v-if="!sidebarCollapsed">
+      <div class="section-title">
+        <span>知识库</span>
+        <button class="icon-btn small" @click="showNewKB = true" title="新建知识库">+</button>
+      </div>
+      <div class="kb-list">
+        <div
+          v-for="kb in knowledgeBases"
+          :key="kb.id"
+          class="kb-item"
+          :class="{ active: currentKB?.id === kb.id }"
+          @click="selectKB(kb)"
+        >
+          <span class="kb-name">{{ kb.name }}</span>
+          <span class="kb-count">{{ kb.document_count }} 文档</span>
+        </div>
+        <div v-if="!knowledgeBases.length" class="empty-hint">
+          还没有知识库，点击 + 创建
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Sessions -->
+    <div class="sidebar-section" v-if="!sidebarCollapsed && currentKB">
+      <div class="section-title">
+        <span>对话</span>
+        <button class="icon-btn small" @click="newChat" title="新建对话">+</button>
+      </div>
+      <div class="chat-list">
+        <div
+          v-for="s in chatSessions"
+          :key="s.id"
+          class="chat-item"
+          :class="{ active: currentSession?.id === s.id }"
+          @click="selectSession(s)"
+        >
+          <span class="chat-title">{{ s.title }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="sidebar-footer" v-if="!sidebarCollapsed">
+      <button class="text-btn" @click="showSettings = true">⚙️ 模型配置</button>
+    </div>
+  </aside>
+
+  <!-- ===== Main Area ===== -->
+  <main class="main-area">
+
+    <!-- Dashboard (no KB selected) -->
+    <div v-if="!currentKB" class="dashboard">
+      <h1>📚 miniKB</h1>
+      <p class="subtitle">Mini RAG 知识库系统 — 上传文档，智能问答</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-num">{{ stats.knowledge_bases || 0 }}</span>
+          <span class="stat-label">知识库</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">{{ stats.documents || 0 }}</span>
+          <span class="stat-label">文档</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">{{ stats.total_chunks || 0 }}</span>
+          <span class="stat-label">文本块</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">{{ stats.chat_messages || 0 }}</span>
+          <span class="stat-label">对话消息</span>
+        </div>
+      </div>
+      <div class="quick-start">
+        <h3>快速开始</h3>
+        <ol>
+          <li>点击左侧 <b>+</b> 创建一个知识库</li>
+          <li>在知识库中上传文档（PDF / Word / TXT / Markdown）</li>
+          <li>等待文档处理完成（分块 + 向量化）</li>
+          <li>新建对话，开始向知识库提问</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- KB Detail View -->
+    <div v-else-if="currentKB && !currentSession" class="kb-detail">
+      <div class="detail-header">
+        <h2>{{ currentKB.name }}</h2>
+        <p class="kb-desc">{{ currentKB.description || '暂无描述' }}</p>
+      </div>
+
+      <!-- Upload Area -->
+      <div class="upload-zone" @dragover.prevent="dragActive = true" @dragleave="dragActive = false" @drop.prevent="handleDrop" :class="{ active: dragActive }">
+        <div class="upload-inner">
+          <span class="upload-icon">📄</span>
+          <p>拖拽文件到此处上传，或 <label class="upload-label">点击选择文件<input type="file" multiple accept=".pdf,.docx,.txt,.md,.html" @change="handleFileSelect" hidden /></label></p>
+          <p class="upload-hint">支持 PDF / DOCX / TXT / MD / HTML</p>
+        </div>
+      </div>
+
+      <!-- Document List -->
+      <div class="doc-list">
+        <h3>文档列表 ({{ documents.length }})</h3>
+        <div class="doc-item" v-for="doc in documents" :key="doc.id">
+          <div class="doc-info">
+            <span class="doc-icon">{{ docIcon(doc.file_type) }}</span>
+            <div>
+              <div class="doc-name">{{ doc.name }}</div>
+              <div class="doc-meta">
+                {{ doc.file_type.toUpperCase() }} · {{ formatSize(doc.file_size) }} · {{ doc.chunk_count }} 块
+              </div>
+            </div>
+          </div>
+          <div class="doc-actions">
+            <span class="status-badge" :class="doc.status">{{ statusText(doc.status) }}</span>
+            <button class="icon-btn danger" @click="deleteDoc(doc)" title="删除">✕</button>
+          </div>
+        </div>
+        <div v-if="!documents.length" class="empty-hint">还没有上传文档</div>
+      </div>
+    </div>
+
+    <!-- Chat View -->
+    <div v-else-if="currentSession" class="chat-view">
+      <div class="chat-header">
+        <h3>{{ currentSession.title }}</h3>
+        <span class="chat-kb-name">{{ currentKB?.name }}</span>
+      </div>
+      <div class="messages" ref="messagesContainer">
+        <div v-for="msg in messages" :key="msg.id" class="message" :class="msg.role">
+          <div class="msg-avatar">{{ msg.role === 'user' ? '👤' : '🤖' }}</div>
+          <div class="msg-content">
+            <div class="msg-text" v-html="renderMarkdown(msg.content)"></div>
+            <div v-if="msg.sources && msg.sources.chunks?.length" class="msg-sources">
+              <span class="sources-label">📎 引用来源：</span>
+              <div v-for="(src, i) in msg.sources.chunks" :key="i" class="source-chip" @click="showSource(src)">
+                [{{ i + 1 }}] {{ src.document_name }} ({{ (src.score * 100).toFixed(0) }}%)
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-if="streaming" class="message assistant">
+          <div class="msg-avatar">🤖</div>
+          <div class="msg-content">
+            <div class="msg-text streaming-text">{{ streamBuffer }}<span class="cursor">▊</span></div>
+            <div v-if="streamSources.length" class="msg-sources">
+              <span class="sources-label">📎 引用来源：</span>
+              <div v-for="(src, i) in streamSources" :key="i" class="source-chip">
+                [{{ i + 1 }}] {{ src.document_name }} ({{ (src.score * 100).toFixed(0) }}%)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <textarea
+          v-model="inputText"
+          @keydown.enter.exact.prevent="sendMessage"
+          placeholder="输入问题，Enter 发送..."
+          rows="2"
+        ></textarea>
+        <button class="send-btn" @click="sendMessage" :disabled="!inputText.trim() || streaming">
+          {{ streaming ? '生成中...' : '发送' }}
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Modal: New KB ===== -->
+  <div v-if="showNewKB" class="modal-overlay" @click.self="showNewKB = false">
+    <div class="modal">
+      <h3>新建知识库</h3>
+      <input v-model="newKBName" placeholder="知识库名称" class="modal-input" />
+      <textarea v-model="newKBDesc" placeholder="描述（可选）" rows="2" class="modal-input"></textarea>
+      <div class="modal-actions">
+        <button class="btn secondary" @click="showNewKB = false">取消</button>
+        <button class="btn primary" @click="createKB" :disabled="!newKBName.trim()">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Modal: Settings ===== -->
+  <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false">
+    <div class="modal wide">
+      <h3>⚙️ 模型配置</h3>
+      <p class="modal-hint">通过 .env 文件配置模型。当前配置：</p>
+      <div class="config-grid">
+        <div class="config-section">
+          <h4>LLM 大语言模型</h4>
+          <div class="config-row"><span>模型</span><code>{{ modelConfig.llm?.model || '未配置' }}</code></div>
+          <div class="config-row"><span>API 地址</span><code>{{ modelConfig.llm?.base_url || '未配置' }}</code></div>
+          <div class="config-row"><span>API Key</span><code>{{ modelConfig.llm?.api_key || '未配置' }}</code></div>
+          <div class="config-row"><span>状态</span><span :class="modelConfig.llm?.configured ? 'badge ok' : 'badge no'">{{ modelConfig.llm?.configured ? '已配置' : '未配置' }}</span></div>
+        </div>
+        <div class="config-section">
+          <h4>Embedding 向量模型</h4>
+          <div class="config-row"><span>模型</span><code>{{ modelConfig.embedding?.model || '未配置' }}</code></div>
+          <div class="config-row"><span>API 地址</span><code>{{ modelConfig.embedding?.base_url || '未配置' }}</code></div>
+          <div class="config-row"><span>API Key</span><code>{{ modelConfig.embedding?.api_key || '未配置' }}</code></div>
+          <div class="config-row"><span>状态</span><span :class="modelConfig.embedding?.configured ? 'badge ok' : 'badge no'">{{ modelConfig.embedding?.configured ? '已配置' : '未配置' }}</span></div>
+        </div>
+      </div>
+      <div class="config-section" style="margin-top:16px">
+        <h4>RAG 参数</h4>
+        <div class="config-row"><span>分块大小</span><code>{{ modelConfig.rag?.chunk_size }} 字符</code></div>
+        <div class="config-row"><span>分块重叠</span><code>{{ modelConfig.rag?.chunk_overlap }} 字符</code></div>
+        <div class="config-row"><span>检索 Top-K</span><code>{{ modelConfig.rag?.top_k }}</code></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn primary" @click="showSettings = false">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Source Preview Modal ===== -->
+  <div v-if="sourcePreview" class="modal-overlay" @click.self="sourcePreview = null">
+    <div class="modal">
+      <h3>📎 引用内容</h3>
+      <div class="source-preview-content">{{ sourcePreview.content }}</div>
+      <div class="modal-actions">
+        <button class="btn primary" @click="sourcePreview = null">关闭</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
